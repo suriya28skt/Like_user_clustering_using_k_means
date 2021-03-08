@@ -1,0 +1,94 @@
+---
+title: "K-Means Clustering"
+author: "Suriya Prakaash S.K.T"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_float: yes
+  html_notebook:
+    toc: yes
+    toc_float: yes
+
+---
+## Table of Contents
+### Setting Directory
+```{r}
+library(keras)
+library(dplyr)
+library(caret)
+library(arules)
+library(arulesViz)
+library(factoextra)
+library(cluster)
+
+rm(list=ls())
+
+# Set working directory as needed
+setwd("C:/Users/ssund/Documents/R-Studio Directory")
+
+# Seed the PRNG
+set.seed(1122)
+```
+
+### Reading data into dataframe
+```{r}
+k.df <- read.csv("buddymove.csv")
+clust.df <- select(k.df, -User.Id)
+clust.df <- scale(clust.df, center = F)
+```
+
+### Different methods to find the best number of clusters
+```{r}
+#Elbow method
+fviz_nbclust(clust.df, kmeans, method = "wss")
+#Silhouette method
+fviz_nbclust(clust.df, kmeans, method = "silhouette")
+#Gap_stat method
+fviz_nbclust(clust.df, kmeans, method = "gap_stat")
+```
+
+### Implementing K-Means clustering
+```{r}
+kclust <- kmeans(clust.df, centers = 3)
+fviz_cluster(object = kclust, data =clust.df, method = "wss")
+```
+
+### Displaying Number of observations in clusters
+```{r}
+cat('Number of observations in each cluster are as follows:')
+cat('\n1st Cluster:',kclust$size[1])
+cat('\n2nd Cluster:',kclust$size[2])
+cat('\n3rd Cluster:',kclust$size[3])
+#cat('\n4th Cluster:',kclust$size[4])
+#cat('\n5th Cluster:',kclust$size[5])
+#cat('\n6th Cluster:',kclust$size[6])
+#cat('\n6th Cluster:',kclust$size[7])
+```
+
+### Total SSE of clusters
+```{r}
+cat('Total SSE of the clusters:',kclust$tot.withinss)
+```
+
+### SSE values for each cluster
+```{r}
+cat('SSE values for each cluster are as follows:')
+cat('\n1st Cluster:',kclust$withinss[1])
+cat('\n2nd Cluster:',kclust$withinss[2])
+cat('\n3rd Cluster:',kclust$withinss[3])
+#cat('\n4th Cluster:',kclust$withinss[4])
+```
+
+### Inference from the above clusters
+```{r}
+for(x in 1:4){
+  print(which(kclust$cluster==x))
+}
+#From the above command we can see how the clusters are formed as follows,
+#The people who loves visiting Shopping places, Picnic spots and Religious places are clustered together in First Cluster. This is clear from the reviews for these three places were comparitively high than other columns. This cluster can have users as families  or individuals who prefer to places where they find peace or for their day their day to day needs.
+
+#The people who loves visiting Nature places and Picnic spots are grouped together in the Second Cluster. Since the reviews for these two columns are high when compared to review count in other columns. This cluster has users who prefer spending time as families for vacations.
+
+#The people who loves visiting Theatres and Sports places are clustered in the third cluster. The number of reviews for both theatres and sports places are higher in this cluster when compared with other places. This cluster has users either as families or individuals who prefer entertainment much.
+```
